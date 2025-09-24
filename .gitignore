@@ -1,0 +1,25 @@
+# 编译输出
+build/
+bin/
+obj/
+*.o
+*.out
+*.exe
+*.dll
+*.so
+*.dylib
+
+# CMake 生成文件
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# IDE 配置文件
+.vscode/
+.idea/
+*.swp
+
+# 系统文件
+.DS_Store
+Thumbs.db
