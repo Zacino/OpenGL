@@ -108,20 +108,28 @@ int main() {
     // 渲染循环
     float r = 0.0f;
     float increament = 0.005f;
+
+    Renderer render;
+    
     while (!glfwWindowShouldClose(window))
     {
+        Renderer render;
         // 清空颜色缓冲
-        glClear(GL_COLOR_BUFFER_BIT);
+        // glClear(GL_COLOR_BUFFER_BIT);
+        render.Clear();
 
         // 重新绑定
-        va.Bind(); // 顶点数组记录了 VBO EBO  attr  pointer
+        // va.Bind(); // 顶点数组记录了 VBO EBO  attr  pointer
         shader.Bind();
         shader.SetUniform4f("u_color", r, 0.3f, 0.8f, 1.0f);
+
+        GLCall(render.Draw(va, ib, shader));
 
         // 绘制
         // glDrawArrays(GL_TRIANGLES, 0, 3); # 以线性、连续的方式从顶点缓冲（VBO）中读取数据。
         // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr); # 通过一个额外的索引缓冲（EBO）以间接、非连续的方式从VBO中读取数据。
-        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+        // GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+        
 
         if (r > 1.0f)
             increament = -0.05f;
