@@ -23,7 +23,7 @@ public:
 
 	void Bind() const;
 	void Unbind() const;
-	// void SetUniform1i(const std::string& name, int value);
+	void SetUniform1i(const std::string& name, int value); // texture插槽
 	// void SetUniform1f(const std::string& name, float value);
 	// void SetUniform1iv(const std::string& name, int count, int* value);
 	void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
