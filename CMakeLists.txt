@@ -19,6 +19,7 @@ set(SOURCES
     src/IndexBuffer.cpp
     src/VertexBuffer.cpp
     src/VertexArray.cpp
+    src/Shader.cpp
 )
 
 # 5. 创建可执行文件
