@@ -20,6 +20,8 @@ set(SOURCES
     src/VertexBuffer.cpp
     src/VertexArray.cpp
     src/Shader.cpp
+    src/vendor/stb_image/stb_image.cpp
+    src/Texture.cpp
 )
 
 # 5. 创建可执行文件

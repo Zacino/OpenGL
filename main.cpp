@@ -12,6 +12,7 @@
 #include "src/VertexArray.h"
 #include "src/VertexBufferLayout.h"
 #include "src/Shader.h"
+#include "src/Texture.h"
 
 // test branch
 
@@ -57,10 +58,10 @@ int main() {
 
     // 顶点数据，包含三个顶点的x和y坐标
     float positions[] = {
-        -0.5f, -0.5f,  // 0
-         0.5f,  -0.5f, // 1
-         0.5f, 0.5f,   // 2
-         -0.5f, 0.5f,  // 3
+        -0.5f, -0.5f,  0.0f, 0.0f, // 0
+         0.5f,  -0.5f, 1.0f, 0.0f,// 1
+         0.5f, 0.5f,  1.0f, 1.0f,// 2
+         -0.5f, 0.5f,  0.0f, 1.0f,// 3
     };
     
     /*
@@ -82,6 +83,7 @@ int main() {
     // 内存布局
     VertexBufferLayout layout;
     layout.Push<float>(2); // 2d坐标，两个元素
+    layout.Push<float>(2); // 2个纹理坐标
     // 向va提交记录 即attr 和 point
     va.AddBuffer(vb, layout);
     
@@ -92,12 +94,19 @@ int main() {
         2, 3, 0
     };
     IndexBuffer ib(indices, 6); // 构造函数里面有bind，和填充data
+    GLCall(glEnable(GL_BLEND));
+    GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
     // 创建并使用着色器程序
     Shader shader("res/Basic.shader");
     shader.Bind();
     // 统一变量
     shader.SetUniform4f("u_color", 0.8f, 0.3f, 0.8f, 1.0f);
+
+    Texture texture("res/logo.png");
+    texture.Bind(0);
+    shader.SetUniform1i("u_Texture", 0); // 和bind相同
+
 
     // 解绑
     shader.Unbind();
