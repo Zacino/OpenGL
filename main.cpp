@@ -51,6 +51,7 @@ int main() {
         return -1;
     }
 
+    // only for test
 
     // 顶点数据，包含三个顶点的x和y坐标
     float positions[] = {
