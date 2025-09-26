@@ -94,6 +94,20 @@ int main() {
         2, 3, 0
     };
     IndexBuffer ib(indices, 6); // 构造函数里面有bind，和填充data
+
+    
+    /**
+     * 混合：当一个片段着色器输出颜色 srcColor 时，OpenGL 不会直接写到帧缓冲区，
+     *          而是会跟缓冲区里原本的颜色 dstColor 按照规则混合，生成新的颜色。
+     * 步骤：
+     *      1:启动  glEnable(GL_BLEND);
+     *      2:glBlendFunc(src, dst);    // 设置源和目标因子
+     *                          GL_SRC_ALPHA → 值 = 源颜色的 alpha   
+     *                          GL_ONE_MINUS_SRC_ALPHA → 值 = 1 - 源 alpha
+     *      3:glBlendEquation(GL_FUNC_ADD); // 设置计算方法
+                                GL_FUNC_SUBTRACT → src - dst
+                                GL_FUNC_REVERSE_SUBTRACT → dst - src
+     */
     GLCall(glEnable(GL_BLEND));
     GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
