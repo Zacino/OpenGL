@@ -105,7 +105,7 @@ int main() {
 
     Texture texture("res/logo.png");
     texture.Bind(0);
-    shader.SetUniform1i("u_Texture", 0); // 和bind相同
+    shader.SetUniform1i("u_Texture", 0); // 设置插槽位置，这里的value要和bind的相同
 
 
     // 解绑

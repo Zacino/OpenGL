@@ -5,10 +5,10 @@
 class Texture
 {
 private:
-	unsigned int m_RendererID;
-	std::string m_FilePath;
-	unsigned char* m_LocalBuffer;
-	int m_Width, m_Height, m_BPP;
+	unsigned int m_RendererID; // OpenGL 生成的纹理对象 ID
+	std::string m_FilePath; // 图片路径
+	unsigned char* m_LocalBuffer; // 图片在内存中的buffer
+	int m_Width, m_Height, m_BPP; // 宽度，高度，每像素字节数
 public:
 	Texture(const std::string& path);
 	~Texture();
