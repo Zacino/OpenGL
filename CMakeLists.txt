@@ -7,9 +7,12 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # 3. 查找依赖库
+# glew glfw cmake自带配置，glm库才有配置，需要多config
+# !! 注意在vscode的c_cpp_properties.json 里加上路径
 find_package(glfw3 REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(OpenGL REQUIRED)
+find_package(glm CONFIG REQUIRED)
 
 
 # 4. 定义源文件列表 (手动维护，最清晰)
@@ -42,6 +45,7 @@ target_link_libraries(MyApp PRIVATE
     glfw       # 链接GLFW
     GLEW::GLEW # 链接GLEW (现代CMake的推荐写法)
     OpenGL::GL # 链接OpenGL框架 (现代CMake的推荐写法)
+    glm::glm
 )
 
 # 8. 【解决资源路径问题的关键步骤】
