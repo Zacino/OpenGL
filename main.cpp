@@ -5,6 +5,8 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "src/Render.h"
 #include "src/VertexBuffer.h"
@@ -13,8 +15,6 @@
 #include "src/VertexBufferLayout.h"
 #include "src/Shader.h"
 #include "src/Texture.h"
-
-// test branch
 
 
 int main() {
@@ -32,7 +32,7 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     
     // 创建一个窗口和它的 OpenGL 上下文
-    window = glfwCreateWindow(640, 480, "Hello World", nullptr, nullptr);
+    window = glfwCreateWindow(960, 540, "Hello World", nullptr, nullptr);
     if (!window)
     {           
         std::cerr << "Failed to create GLFW window" << std::endl;
@@ -57,13 +57,19 @@ int main() {
     // only for test
 
     // 顶点数据，包含三个顶点的x和y坐标
+    // float positions[] = {
+    //     -0.5f, -0.5f,  0.0f, 0.0f, // 0
+    //      0.5f,  -0.5f, 1.0f, 0.0f,// 1
+    //      0.5f, 0.5f,  1.0f, 1.0f,// 2
+    //      -0.5f, 0.5f,  0.0f, 1.0f,// 3
+    // };
     float positions[] = {
-        -0.5f, -0.5f,  0.0f, 0.0f, // 0
-         0.5f,  -0.5f, 1.0f, 0.0f,// 1
-         0.5f, 0.5f,  1.0f, 1.0f,// 2
-         -0.5f, 0.5f,  0.0f, 1.0f,// 3
+        100.0f, 100.0f,  0.0f, 0.0f, // 0
+         200.0f,  100.0f, 1.0f, 0.0f,// 1
+         200.0f, 200.0f,  1.0f, 1.0f,// 2
+         100.0f, 200.0f,  0.0f, 1.0f,// 3
     };
-    
+
     /*
         把OpenGL想象成一个工作台，上面有很多专用的“工位”。
         例如，有一个“专门处理顶点数据”的工位，一个“专门处理顶点绘制顺序”的工位等等。 
@@ -95,6 +101,36 @@ int main() {
     };
     IndexBuffer ib(indices, 6); // 构造函数里面有bind，和填充data
 
+
+    /**
+     * 局部空间：模型内部空间
+     * 世界空间：整个场景的通用坐标系
+     * 视图空间：相机视角
+     * 裁剪空间：视图空间通过投影矩阵转到标准坐标系，并进行裁剪，剔除视野范围外的模型
+     * 标准化设备空间NDC：裁剪空间的标准化[-1, 1]
+     * 屏幕空间：NDC映射到最终屏幕
+     * 
+     * 虚拟窗口 (ortho) → 压缩到 NDC [-1,1] → 映射到真实窗口 (glViewport)。
+     * 如果 ortho 的宽高比 = 窗口宽高比 → 图形不会被拉伸。
+     * 
+     * 模型矩阵 (Model Matrix)
+     *      从局部空间转换到世界空间。
+     *      由物体的平移 (Translation)、旋转 (Rotation) 和缩放 (Scaling) 操作组合而成。
+     * 
+     * 视图矩阵 (View Matrix)
+     *      将物体从世界空间转换到视图空间。它模拟了摄像机（观察者）的位置和朝向。
+     *      它是摄像机位置和朝向的逆变换。
+     * 
+     * 投影矩阵 (Projection Matrix)
+     *      从视图空间转换到裁剪空间。
+     *      透视投影 (Perspective Projection) / 正交投影 (Orthographic Projection)
+     */
+    // glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
+    glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f); //正交投影矩阵，定义了虚拟窗口的像素，会映射到屏幕上的窗口
+    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-100, 0, 0));// 视图矩阵
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(200, 200, 0));// 模型矩阵
+    glm::mat4 mvp = proj * view * model;
+    // glm::mat4 mvp = proj;
     
     /**
      * 混合：当一个片段着色器输出颜色 srcColor 时，OpenGL 不会直接写到帧缓冲区，
@@ -116,6 +152,7 @@ int main() {
     shader.Bind();
     // 统一变量
     shader.SetUniform4f("u_color", 0.8f, 0.3f, 0.8f, 1.0f);
+    shader.SetUniformMat4f("u_MVP", mvp);
 
     Texture texture("res/logo.png");
     texture.Bind(0);
