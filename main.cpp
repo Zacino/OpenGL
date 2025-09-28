@@ -15,6 +15,9 @@
 #include "src/VertexBufferLayout.h"
 #include "src/Shader.h"
 #include "src/Texture.h"
+#include "vendor/imgui/imgui.h"
+#include "vendor/imgui/imgui_impl_glfw.h"
+#include "vendor/imgui/imgui_impl_opengl3.h"
 
 
 int main() {
@@ -54,8 +57,6 @@ int main() {
         return -1;
     }
 
-    // only for test
-
     // 顶点数据，包含三个顶点的x和y坐标
     // float positions[] = {
     //     -0.5f, -0.5f,  0.0f, 0.0f, // 0
@@ -92,13 +93,8 @@ int main() {
     layout.Push<float>(2); // 2个纹理坐标
     // 向va提交记录 即attr 和 point
     va.AddBuffer(vb, layout);
-    
-
     // 索引缓冲对象 IBO 存储顶点索引
-    unsigned int indices[] = {
-        0, 1, 2,
-        2, 3, 0
-    };
+    unsigned int indices[] = {0, 1, 2,2, 3, 0};
     IndexBuffer ib(indices, 6); // 构造函数里面有bind，和填充data
 
 
@@ -125,12 +121,9 @@ int main() {
      *      从视图空间转换到裁剪空间。
      *      透视投影 (Perspective Projection) / 正交投影 (Orthographic Projection)
      */
-    // glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
+    glm::vec3 translation(200, 200, 0);
     glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f); //正交投影矩阵，定义了虚拟窗口的像素，会映射到屏幕上的窗口
     glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-100, 0, 0));// 视图矩阵
-    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(200, 200, 0));// 模型矩阵
-    glm::mat4 mvp = proj * view * model;
-    // glm::mat4 mvp = proj;
     
     /**
      * 混合：当一个片段着色器输出颜色 srcColor 时，OpenGL 不会直接写到帧缓冲区，
@@ -152,7 +145,7 @@ int main() {
     shader.Bind();
     // 统一变量
     shader.SetUniform4f("u_color", 0.8f, 0.3f, 0.8f, 1.0f);
-    shader.SetUniformMat4f("u_MVP", mvp);
+    // shader.SetUniformMat4f("u_MVP", mvp);
 
     Texture texture("res/logo.png");
     texture.Bind(0);
@@ -160,35 +153,45 @@ int main() {
 
 
     // 解绑
-    shader.Unbind();
-    va.Unbind();
-    vb.UnBind();
-    ib.Unbind();
+    // shader.Unbind();
+    // va.Unbind();
+    // vb.UnBind();
+    // ib.Unbind();
 
     // 渲染循环
     float r = 0.0f;
     float increament = 0.005f;
 
     Renderer render;
+
+    ImGui::CreateContext();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui::StyleColorsDark();
+
+    // 需要指定GLSL版本, 也就是shader中的version
+    const char* glsl_version = "#version 330";
+    ImGui_ImplOpenGL3_Init(glsl_version);
     
     while (!glfwWindowShouldClose(window))
     {
-        Renderer render;
         // 清空颜色缓冲
-        // glClear(GL_COLOR_BUFFER_BIT);
-        render.Clear();
+        render.Clear(); 
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
 
         // 重新绑定
         // va.Bind(); // 顶点数组记录了 VBO EBO  attr  pointer
         shader.Bind();
-        shader.SetUniform4f("u_color", r, 0.3f, 0.8f, 1.0f);
+        // shader.SetUniform4f("u_color", r, 0.3f, 0.8f, 1.0f);
 
-        GLCall(render.Draw(va, ib, shader));
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), translation);// 模型矩阵
+        glm::mat4 mvp = proj * view * model;
+        shader.SetUniformMat4f("u_MVP", mvp);
 
         // 绘制
-        // glDrawArrays(GL_TRIANGLES, 0, 3); # 以线性、连续的方式从顶点缓冲（VBO）中读取数据。
-        // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr); # 通过一个额外的索引缓冲（EBO）以间接、非连续的方式从VBO中读取数据。
-        // GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+        GLCall(render.Draw(va, ib, shader));
         
 
         if (r > 1.0f)
@@ -196,6 +199,17 @@ int main() {
         else if (r < 0.0f)
             increament = 0.005f;
         r += increament;
+
+        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
+        {
+            ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+            ImGui::SliderFloat("translation", &translation.x, 0.0f, 960.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            ImGui::End();
+        }
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         
         // 交换前后缓冲
         glfwSwapBuffers(window);
@@ -203,8 +217,14 @@ int main() {
         // 处理所有待处理的事件
         glfwPollEvents();
     }
-    
-    std::cout << "Shutting down OpenGL" << std::endl;
+
+    // Cleanup
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+    glfwDestroyWindow(window);
     glfwTerminate();
+
+    std::cout << "Shutting down OpenGL" << std::endl;
     return 0;
 }
