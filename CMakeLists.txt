@@ -16,22 +16,20 @@ find_package(glm CONFIG REQUIRED)
 
 
 # 4. 定义源文件列表
+# file(GLOB SOURCES src/*.cpp) 找到 src 目录下所有 .cpp 文件，然后放到变量 SOURCES 里。
 file(GLOB SOURCES
     src/*.cpp
     src/vendor/imgui/*.cpp
     src/vendor/stb_image/*.cpp
+    src/tests/*.cpp
 )
+
 # set(FOO bar) 定义一个变量 FOO = "bar", 以后用这个变量，要写 ${FOO}
-# file(GLOB SOURCES src/*.cpp) 找到 src 目录下所有 .cpp 文件，然后放到变量 SOURCES 里。
-# set(SOURCES
-#     main.cpp
-#     src/Render.cpp
-#     src/vendor/stb_image/stb_image.cpp
-# )
+# 覆盖变量 SOURCES 里面包含 main.cpp 以及之前的 ${SOURCES}
 set(SOURCES
     main.cpp
     ${SOURCES}
-) # 覆盖变量 SOURCES 里面包含 main.cpp 以及之前的 ${SOURCES}
+)
 
 # 5. 生成可执行文件，把指定的文件一起编译链接
 add_executable(MyApp ${SOURCES})  # 等价于：add_executable(MyApp main.cpp  src/a.cpp s rc/b.cpp)
